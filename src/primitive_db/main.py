@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 def main():
     """Точка входа приложения."""
     print("DB project is running!")
