@@ -2,6 +2,7 @@
 
 from primitive_db.engine import welcome
 
+
 def main():
     """Точка входа приложения."""
     print("Первая попытка запустить проект!")

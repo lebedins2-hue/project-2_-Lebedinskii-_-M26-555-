@@ -1,5 +1,6 @@
 import prompt
 
+
 def welcome():
     """Выводит приветствие и цикл с вводом команд."""
     print("<command> exit - выйти из программы")
