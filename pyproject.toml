@@ -1,5 +1,5 @@
 [project]
-name = "primitive-db"
+name = "primitive_db"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -31,3 +31,9 @@ ignore = []
 dev = [
     "ruff>=0.17.4",
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["primitive_db"]
+
+
