@@ -39,7 +39,9 @@ def create_table(metadata, table_name, columns):
         raise ValueError("Не указаны имена столбцов")
 
    base = {ID_COLUMN: ID_TYPE}
-   column_names = set()
+   column_names = []
+   seen_names = set() 
+   column_names.append(ID_COLUMN)
 
    for column in columns:
         parts = column.split(":",1)
@@ -51,6 +53,10 @@ def create_table(metadata, table_name, columns):
         column_name, column_type = parts
         column_name = column_name.strip()
         column_type = column_type.strip()
+
+        if not column_name:
+            print(f"Ошибка: пустое имя колонки в '{column}'.")
+            return None
                
         if not validate_name(column_name):
             print(f'Ошибка: Некорректное имя столбца "{column_name}"')
@@ -60,10 +66,10 @@ def create_table(metadata, table_name, columns):
         if column_type not in VALID_TYPES:
             raise ValueError("не верный тип данных: ", column)
 
-        if column_name in column_names:
+        if column_name in seen_names:
             raise ValueError("такое имя уже есть: ", column)
 
-        column_names.add(column_name)
+        seen_names.add(column_name)
 
         if column_name == ID_COLUMN:
             if column_type != ID_TYPE:
@@ -72,6 +78,7 @@ def create_table(metadata, table_name, columns):
             continue
 
         base[column_name] = column_type
+        column_names.append(column_name)
 
    metadata[table_name] = base
    print(

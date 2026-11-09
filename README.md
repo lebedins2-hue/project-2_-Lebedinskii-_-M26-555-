@@ -33,12 +33,30 @@ list_tables - показать список таблиц.
 drop_table <имя> - удалить таблицу.
 help - показать справку.
 exit - завершить работу.
-Пример:
 
+Пример:
 create_table users name:str age:int is_active:bool
 list_tables
 drop_table users
 exit
 
 
-project = "primitive_db.main:main" 
+Проверка качества и сборка
+Проверка кода с помощью Ruff:
+
+make lint
+Эквивалентная команда:
+
+uv run ruff check .
+Сборка исходного архива и wheel-пакета:
+
+uv build
+Проверка метаданных собранных пакетов:
+
+uvx twine check dist/*
+Сборка создаёт файлы в каталоге dist/, который исключён из Git. Проверка через twine check не публикует пакет.
+
+Демонстрация работы
+Управление таблицами
+Демонстрация установки пакета, создания, просмотра и удаления таблиц.
+https://disk.yandex.ru/i/Z_Q9a0yKVsOIjQ

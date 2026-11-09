@@ -1,1 +1,14 @@
-{}
+{
+    "user": {
+        "ID": "int",
+        "id": "int",
+        "c": "int",
+        "b": "str"
+    },
+    "user2": {
+        "ID": "int",
+        "id": "str",
+        "c": "int",
+        "b": "str"
+    }
+}
