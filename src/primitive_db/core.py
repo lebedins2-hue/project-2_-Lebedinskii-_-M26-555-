@@ -44,9 +44,9 @@ def create_table(metadata, table_name, columns):
    for column in columns:
         parts = column.split(":",1)
 
-        if len(parts) != 2:
+        if len(parts) != 2 or not parts[0] or parts[1] not in VALID_TYPES:
             print(f"Неверный формат колонки '{column}': ожидается 'name:type'.")
-            return metadata
+            return None
 
         column_name, column_type = parts
         column_name = column_name.strip()
@@ -67,7 +67,8 @@ def create_table(metadata, table_name, columns):
 
         if column_name == ID_COLUMN:
             if column_type != ID_TYPE:
-                raise ValueError("не верный тип данных: ", column)
+                raise ValueError(f"Ошибка: для колонки {ID_COLUMN} разрешён только тип {ID_TYPE}.")
+                return None
             continue
 
         base[column_name] = column_type
@@ -92,7 +93,7 @@ def drop_table(metadata, table_name):
 
 def list_tables(metadata):
     """Выводит имена существующих таблиц."""
-    if not metadata:
+    if not metadata or len(metadata) == 0:
         print("Таблиц нет")
         return 
     for table_name in metadata:

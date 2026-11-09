@@ -69,7 +69,8 @@ def run():
             if result is not None:
                metadata = result
                save_metadata(META_FILE, metadata)
-               print(f"Таблица '{table_name}' создана и сохранена.")
+            else:
+                pass
 
         elif command == "list_tables":
             if arguments:
