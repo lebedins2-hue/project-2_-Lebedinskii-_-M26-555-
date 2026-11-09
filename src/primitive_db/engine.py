@@ -5,7 +5,8 @@ import prompt
 from primitive_db.constants import ID_COLUMN, META_FILE
 from primitive_db.core import (
     create_table,
-    drop_table  )
+    drop_table,
+    list_tables  )
 from primitive_db.utils import (
     load_metadata,
     save_metadata,
@@ -26,10 +27,11 @@ def print_help():
 
 def run():
     """Выводит приветствие и цикл с вводом команд."""
+    metadata = load_metadata(META_FILE)
     print_help()
     while True:
         # Аналог prompt.string('Введите команду: ')
-        metadata = load_metadata(META_FILE)
+        
         user_input = prompt.string("Введите команду: ").strip().lower()
 
         try:
@@ -69,6 +71,10 @@ def run():
                save_metadata(META_FILE, metadata)
                print(f"Таблица '{table_name}' создана и сохранена.")
 
+        elif command == "list_tables":
+            if arguments:
+                raise ValueError(" ".join(arguments))
+            list_tables(metadata)   
 
         elif command == "drop_table":
             if len(args) != 2:

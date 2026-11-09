@@ -39,3 +39,6 @@ create_table users name:str age:int is_active:bool
 list_tables
 drop_table users
 exit
+
+
+project = "primitive_db.main:main" 

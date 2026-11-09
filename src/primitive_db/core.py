@@ -48,14 +48,15 @@ def create_table(metadata, table_name, columns):
             print(f"Неверный формат колонки '{column}': ожидается 'name:type'.")
             return metadata
 
-        if not validate_name(column):
-            print(f'Ошибка: Некорректное имя столбца "{column}"')
-            return metadata
-        
         column_name, column_type = parts
         column_name = column_name.strip()
         column_type = column_type.strip()
-       
+               
+        if not validate_name(column_name):
+            print(f'Ошибка: Некорректное имя столбца "{column_name}"')
+            return metadata
+        
+        
         if column_type not in VALID_TYPES:
             raise ValueError("не верный тип данных: ", column)
 
@@ -87,3 +88,12 @@ def drop_table(metadata, table_name):
 
     del metadata[table_name]
     return metadata
+
+
+def list_tables(metadata):
+    """Выводит имена существующих таблиц."""
+    if not metadata:
+        print("Таблиц нет")
+        return 
+    for table_name in metadata:
+        print(f"{table_name}")
