@@ -1,5 +1,11 @@
 #Основная логика работы с таблицами и данными
-from primitive_db.constants import ID_COLUMN, ID_TYPE, VALID_TYPES
+from primitive_db.constants import (
+        ID_COLUMN, 
+        ID_TYPE,
+        VALID_TYPES,
+        TABLE_MISSING_MESSAGE,
+        INVALID_VALUE_MESSAGE,
+        TYPE_CLASSES)
 
 
 def validate_name(table_name):
@@ -22,6 +28,34 @@ def validate_name(table_name):
             return False
 
     return True
+
+def invalid(value):
+    '''Сообщение о значении, не в соответствии со схемой'''
+    raise ValueError(INVALID_VALUE_MESSAGE.format(value=value))
+
+def validate_columns(columns):
+    '''Проверить определения столбцов и поставить единственный ID первым'''
+    if not columns:
+        invalid("не указаны столбцы")
+    result = [ID_COLUMN]
+    seen = set()
+    for column in columns:
+        name, separator, column_type = column.partition(":")
+        if (
+            not separator
+            or not name.isidentifier()
+            or column_type not in VALID_TYPES
+            or name in seen
+        ):
+            invalid(column)
+        seen.add(name)
+        if name == ID_COLUMN_NAME:
+            if column != ID_COLUMN:
+                invalid(column)
+        else:
+            result.append(column)
+    return result
+
 
 def create_table(metadata, table_name, columns):
    '''Создаёт и проверяет таблицу и добавляет столбец ID.'''
@@ -105,3 +139,48 @@ def list_tables(metadata):
         return 
     for table_name in metadata:
         print(f"{table_name}")
+
+def validate_fields(schema, fields):
+    '''Проверяет существование столбцов и типы переданных значений.'''
+    for column_name, value in fields.items():
+        if column_name not in schema:
+            raise ValueError(f"Столбец `{column_name}` не существует")
+
+        expected_type = TYPE_CLASSES[schema[column_name]]
+
+        if type(value) is not expected_type:
+            raise ValueError(
+                f"Столбец `{column_name}` "
+                f"требует тип {schema[column_name]}"
+            )
+
+def insert(metadata, table_name, table_data, values):
+    '''Возвращает список записей с новой записью и автоматически созданным ID'''
+    schema = get_schema(metadata, table_name)
+    columns = [n for n in schema if n != ID_COLUMN]
+
+    if len(values) != len(columns):
+        raise ValueError(
+            f"Ожидается значений: {len(columns)}, получено: {len(values)}"
+        )
+
+    record = dict(zip(columns, values))
+    validate_fields(schema, record)
+
+    new_id = max(
+        (record[ID_COLUMN] for record in table_data),
+        default=0,
+    ) + 1
+
+    new_record = {ID_COLUMN: new_id, **record}
+    return [*table_data, new_record]
+
+def get_schema(metadata, table_name):
+    '''Проверить существование таблицы и вернуть соответствие имён типам'''
+    if table_name not in metadata:
+        raise ValueError(TABLE_MISSING_MESSAGE.format(table_name=table_name))
+    columns = metadata[table_name]
+    if validate_columns(columns) != columns:
+        invalid("повреждённая схема таблицы")
+    return dict(column.split(":") for column in columns)
+

@@ -8,3 +8,5 @@ TYPE_CLASSES = {
     "str": str,
     "bool": bool
 }
+TABLE_MISSING_MESSAGE = 'Ошибка: Таблица "{table_name}" не существует.'
+INVALID_VALUE_MESSAGE = "Некорректное значение: {value}. Попробуйте снова."
