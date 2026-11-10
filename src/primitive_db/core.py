@@ -1,4 +1,6 @@
 #Основная логика работы с таблицами и данными
+import json
+
 from primitive_db.constants import (
         ID_COLUMN, 
         ID_TYPE,
@@ -7,6 +9,28 @@ from primitive_db.constants import (
         INVALID_VALUE_MESSAGE,
         TYPE_CLASSES)
 
+
+def create_cacher():
+    '''Создаёт функцию кэширования со словарём'''
+    cache = {}
+
+    def cache_result(key, value_func):
+        '''Возвращает результат из кэша или вычисляет и сохраняет его.'''
+        if key not in cache:
+            cache[key] = value_func()
+
+        return cache[key]
+
+    def clear_cache():
+        """Удаляет все результаты из кэша."""
+        cache.clear()
+
+    cache_result.clear = clear_cache
+    return cache_result
+
+
+
+SELECT_CACHE = create_cacher()
 
 def validate_name(table_name):
     '''Проверка корректности имени таблицы и столбца'''
@@ -181,6 +205,51 @@ def get_schema(metadata, table_name):
         raise ValueError(TABLE_MISSING_MESSAGE.format(table_name=table_name))
     columns = metadata[table_name]
     if validate_columns(columns) != columns:
-        invalid("повреждённая схема таблицы")
+        invalid("неверная схема таблицы")
     return dict(column.split(":") for column in columns)
+
+def select_where_check(record, where_clause):
+    '''Проверяет соответствие записи всем условиям выборки.'''
+    return all(
+        record[column_name] == value
+        for column_name, value in where_clause.items()
+    )
+
+def select_where_check(record, where_clause):
+    '''Проверяет соответствие записи всем условиям выборки.'''
+    return all(
+        record[column_name] == value
+        for column_name, value in where_clause.items()
+    )
+
+def select(table_data, where_clause=None):
+    '''Возвращает копии выбранных записей с использованием кэша.'''
+    cache_key = json.dumps(
+        [table_data, where_clause],
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+
+    def find_records():
+        '''Вычисляет результат выборки если его нет в кэше.'''
+        return [
+            record.copy()
+            for record in table_data
+            if (
+                where_clause is None
+                or select_where_check(record, where_clause)
+            )
+        ]
+
+    cached_records = SELECT_CACHE(cache_key, find_records)
+
+    return [record.copy() for record in cached_records]
+
+def delete(table_data, where_clause):
+    '''Возвращает новый список без записей, соответствующих условию'''
+    return [
+        record.copy()
+        for record in table_data
+        if not select_where_check(record, where_clause)
+    ]
 
